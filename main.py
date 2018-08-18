@@ -1,6 +1,7 @@
 # coding: utf-8
 import requests
 import re
+import os
 from bs4 import BeautifulSoup
 from lxml import html
 
@@ -27,7 +28,7 @@ selectors = html.fromstring(second_r).xpath('//select[@id = "chapterSelectorSele
 selectors.reverse()
 
 # Парсим ссылки на картинки с одной главы
-imgs_r = requests_r('http://readmanga.me' + selectors[0])
+imgs_r = requests_r('http://readmanga.me' + selectors[1])
 urls = []
 result = re.findall(r'rm_h\.init\((.+\]\])', imgs_r)[0].split("],")
 for item in result:
@@ -35,8 +36,21 @@ for item in result:
   urls.append(res[0][0] + res[0][1])
 
 # Сохраняем картинки в папку тест
+# Создание структуры
+img_folder = selectors[1].split("?")[0].split("/")
+img_folder_manga = img_folder[len(img_folder)-3]
+img_folder_vol = img_folder[len(img_folder)-2]
+img_folder_ch = img_folder[len(img_folder)-1]
+img_link_folder = img_folder_manga + '/' + img_folder_vol + '/' + img_folder_ch + '/'
+
+try:
+  os.makedirs(img_link_folder)
+except OSError:
+  pass
+
 for url in urls:
   img_name = url.split("?")[0].split("/")
   img_name = img_name[len(img_name)-1]
   r = requests.get(url, allow_redirects=True)
-  open('test/'+img_name, 'wb').write(r.content)
+  open(img_link_folder + img_name, 'wb').write(r.content)
+
