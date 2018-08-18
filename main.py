@@ -5,7 +5,9 @@ import os
 from bs4 import BeautifulSoup
 from lxml import html
 
-url_manga = 'http://readmanga.me/nekomata_'
+print('Скрипт mangaDownloader | https://github.com/LightC0de/mangaDownloader\nВведите ссылку на мангу:')
+url_manga = input()
+
 headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
         'Accept-Encoding': 'gzip, deflate',
@@ -61,4 +63,5 @@ for selector in selectors:
     i_img += 1;
 
 print('\nСохранение завершено успешно!')
-print('Скачано: ' + str(i_img) + ' каринок.')
+print('Скачано: ' + str(i_img) + ' картинок.')
+input("\n\nНажмите Enter чтобы выйти .")
