@@ -5,7 +5,7 @@ import os
 from bs4 import BeautifulSoup
 from lxml import html
 
-url_manga = 'http://readmanga.me/one_piece__A1b8a09'
+url_manga = 'http://readmanga.me/nekomata_'
 headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
         'Accept-Encoding': 'gzip, deflate',
@@ -19,15 +19,17 @@ def requests_r(url):
   return requests.session().get(url, headers = headers).text
 
 # Парсим с главной странцы манги ссылку на чтение глав
-print('Парсим с главной странцы манги ссылку на чтение глав')
+print('Парсим с главной странцы манги ссылку на чтение глав.')
 first_r = requests_r(url_manga)
 url_read = html.fromstring(first_r).xpath('//span[@class = "read-first"]/a/@href')[0] 
 
 # Парсим список ссылок на главы
-print('Парсим список ссылок на главы')
+print('Парсим список ссылок на главы.')
 second_r = requests_r('http://readmanga.me' + url_read)
 selectors = html.fromstring(second_r).xpath('//select[@id = "chapterSelectorSelect"]/option/@value')
 selectors.reverse()
+i_img = 0
+
 for selector in selectors:
   # Парсим ссылки на картинки с одной главы
   imgs_r = requests_r('http://readmanga.me' + selector)
@@ -56,4 +58,7 @@ for selector in selectors:
     r = requests.get(url, allow_redirects=True)
     open(img_link_folder + img_name, 'wb').write(r.content)
     print('Сохранено: ' + img_link_folder + img_name)
+    i_img += 1;
 
+print('\nСохранение завершено успешно!')
+print('Скачано: ' + str(i_img) + ' каринок.')
