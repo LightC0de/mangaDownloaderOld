@@ -19,38 +19,41 @@ def requests_r(url):
   return requests.session().get(url, headers = headers).text
 
 # Парсим с главной странцы манги ссылку на чтение глав
+print('Парсим с главной странцы манги ссылку на чтение глав')
 first_r = requests_r(url_manga)
 url_read = html.fromstring(first_r).xpath('//span[@class = "read-first"]/a/@href')[0] 
 
 # Парсим список ссылок на главы
+print('Парсим список ссылок на главы')
 second_r = requests_r('http://readmanga.me' + url_read)
 selectors = html.fromstring(second_r).xpath('//select[@id = "chapterSelectorSelect"]/option/@value')
 selectors.reverse()
+for selector in selectors:
+  # Парсим ссылки на картинки с одной главы
+  imgs_r = requests_r('http://readmanga.me' + selector)
+  urls = []
+  result = re.findall(r'rm_h\.init\((.+\]\])', imgs_r)[0].split("],")
+  for item in result:
+    res = re.findall(r'\[\'\',\'(.+)\',"(.+)"', item)
+    urls.append(res[0][0] + res[0][1])
 
-# Парсим ссылки на картинки с одной главы
-imgs_r = requests_r('http://readmanga.me' + selectors[1])
-urls = []
-result = re.findall(r'rm_h\.init\((.+\]\])', imgs_r)[0].split("],")
-for item in result:
-  res = re.findall(r'\[\'\',\'(.+)\',"(.+)"', item)
-  urls.append(res[0][0] + res[0][1])
+  # Сохраняем картинки в папку
+  # Создание структуры
+  img_folder = selector.split("?")[0].split("/")
+  img_folder_manga = img_folder[len(img_folder)-3]
+  img_folder_vol = img_folder[len(img_folder)-2]
+  img_folder_ch = img_folder[len(img_folder)-1]
+  img_link_folder = img_folder_manga + '/' + img_folder_vol + '/' + img_folder_ch + '/'
 
-# Сохраняем картинки в папку тест
-# Создание структуры
-img_folder = selectors[1].split("?")[0].split("/")
-img_folder_manga = img_folder[len(img_folder)-3]
-img_folder_vol = img_folder[len(img_folder)-2]
-img_folder_ch = img_folder[len(img_folder)-1]
-img_link_folder = img_folder_manga + '/' + img_folder_vol + '/' + img_folder_ch + '/'
+  try:
+    os.makedirs(img_link_folder)
+  except OSError:
+    pass
 
-try:
-  os.makedirs(img_link_folder)
-except OSError:
-  pass
-
-for url in urls:
-  img_name = url.split("?")[0].split("/")
-  img_name = img_name[len(img_name)-1]
-  r = requests.get(url, allow_redirects=True)
-  open(img_link_folder + img_name, 'wb').write(r.content)
+  for url in urls:
+    img_name = url.split("?")[0].split("/")
+    img_name = img_name[len(img_name)-1]
+    r = requests.get(url, allow_redirects=True)
+    open(img_link_folder + img_name, 'wb').write(r.content)
+    print('Сохранено: ' + img_link_folder + img_name)
 
