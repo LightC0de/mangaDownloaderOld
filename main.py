@@ -24,7 +24,7 @@ def main():
 
   # Парсим с главной странцы манги ссылку на чтение глав
   first_r = requests_r(url_manga)
-  url_read = html.fromstring(first_r).xpath('//span[@class = "read-first"]/a/@href')[0] 
+  url_read = html.fromstring(first_r).xpath('//div[@class = "subject-actions col-sm-7"]/a/@href')[0] 
 
   # Парсим список ссылок на главы
   print('Парсим список ссылок на главы.')
